@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option go_package = "github.com/RakhatLukum/CodeMart/proto;proto";
+
+package cart;
+
+service CartService {
+  rpc AddToCart (CartRequest) returns (CartResponse);
+  rpc RemoveFromCart (CartRequest) returns (CartResponse);
+  rpc GetCart (UserIdRequest) returns (CartItems);
+}
+
+message CartRequest {
+  int32 user_id = 1;
+  int32 product_id = 2;
+}
+
+message UserIdRequest {
+  int32 user_id = 1;
+}
+
+message CartItem {
+  int32 product_id = 1;
+}
+
+message CartItems {
+  repeated CartItem items = 1;
+}
+
+message CartResponse {
+  string message = 1;
+}

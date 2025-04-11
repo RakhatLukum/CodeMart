@@ -1,4 +1,4 @@
-module github.com/RakhatLukum/CodeMart.git
+module github.com/RakhatLukum/CodeMart
 
 go 1.22.2
 
