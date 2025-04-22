@@ -1,0 +1,12 @@
+{
+    "servers": {
+        "my-mcp-server-5cb56492": {
+            "type": "stdio",
+            "command": "npx",
+            "args": [
+                "-y",
+                "mcprouter"
+            ]
+        }
+    }
+}

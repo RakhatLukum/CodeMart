@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: microshop-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: MyStrongPassword123!
+      MYSQL_DATABASE: shop
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/2-seed.sql
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
