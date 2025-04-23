@@ -1,12 +1,9 @@
 {
-    "servers": {
-        "my-mcp-server-5cb56492": {
-            "type": "stdio",
-            "command": "npx",
-            "args": [
-                "-y",
-                "mcprouter"
-            ]
-        }
+  "servers": {
+    "Context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
     }
+  }
 }

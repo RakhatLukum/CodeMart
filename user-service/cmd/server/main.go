@@ -17,7 +17,7 @@ import (
 func main() {
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
-		dsn := "root:MyStrongPassword123!@tcp(127.0.0.1:3306)/shop?parseTime=true"
+		dsn = "root:MyStrongPassword123!@tcp(127.0.0.1:3306)/shop?parseTime=true"
 	}
 
 	db, err := sql.Open("mysql", dsn)
