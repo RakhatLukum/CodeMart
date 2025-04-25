@@ -2,8 +2,8 @@ package grpc
 
 import (
 	"CodeMart/product-service/internal/product/usecase"
+	productpb "CodeMart/proto/product"
 	"context"
-	productpb "proto/product"
 
 	"google.golang.org/grpc"
 )
@@ -39,6 +39,20 @@ func (s *server) GetProductById(ctx context.Context, req *productpb.ProductIdReq
 }
 func (s *server) GetProductsByTag(ctx context.Context, req *productpb.TagRequest) (*productpb.ProductList, error) {
 	list, err := s.uc.ByTag(req.Tag)
+	if err != nil {
+		return nil, err
+	}
+	var res productpb.ProductList
+	for _, p := range list {
+		res.Products = append(res.Products, &productpb.Product{
+			Id: int32(p.ID), Name: p.Name, Price: float32(p.Price), Tags: p.Tags,
+		})
+	}
+	return &res, nil
+}
+
+func (s *server) SearchProducts(ctx context.Context, req *productpb.SearchRequest) (*productpb.ProductList, error) {
+	list, err := s.uc.Search(req.Query)
 	if err != nil {
 		return nil, err
 	}

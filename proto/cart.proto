@@ -11,6 +11,15 @@ service CartService {
   rpc AddToCart (CartItemRequest) returns (CartResponse);
   rpc RemoveFromCart (CartItemRequest) returns (CartResponse);
   rpc GetCart (UserIdRequest) returns (CartList);
+  rpc ClearCart (UserIdRequest) returns (CartResponse);
+  rpc CartItemCount (UserIdRequest) returns (CartCountResponse);
+  rpc HasProduct (CartItemRequest) returns (CartHasResponse);
+  rpc ReplaceCart (ReplaceCartRequest) returns (CartResponse);
+  rpc GetCartTotal (UserIdRequest) returns (CartTotalResponse);
+  rpc GetCartProducts (UserIdRequest) returns (CartProductList);
+  rpc AddMultipleToCart (AddMultipleRequest) returns (CartResponse);
+  rpc RemoveMultipleFromCart (RemoveMultipleRequest) returns (CartResponse);
+  rpc GetCartSummary (UserIdRequest) returns (CartSummaryResponse);
 }
 
 message CartItemRequest {
@@ -28,4 +37,47 @@ message CartList {
 
 message CartResponse {
   string message = 1;
+}
+
+message CartCountResponse {
+  int32 count = 1;
+}
+
+message CartHasResponse {
+  bool has = 1;
+}
+
+message ReplaceCartRequest {
+  int32 user_id = 1;
+  repeated int32 product_ids = 2;
+}
+
+message CartTotalResponse {
+  float total = 1;
+}
+
+message CartProductList {
+  repeated Product products = 1;
+}
+
+message Product {
+  int32 id = 1;
+  string name = 2;
+  float price = 3;
+  repeated string tags = 4;
+}
+
+message AddMultipleRequest {
+  int32 user_id = 1;
+  repeated int32 product_ids = 2;
+}
+
+message RemoveMultipleRequest {
+  int32 user_id = 1;
+  repeated int32 product_ids = 2;
+}
+
+message CartSummaryResponse {
+  int32 count = 1;
+  float total = 2;
 }

@@ -9,6 +9,7 @@ service ProductService {
   rpc GetAllProducts (Empty) returns (ProductList);
   rpc GetProductById (ProductIdRequest) returns (Product);
   rpc GetProductsByTag (TagRequest) returns (ProductList);
+  rpc SearchProducts (SearchRequest) returns (ProductList);
 }
 
 message Product {
@@ -28,4 +29,8 @@ message ProductIdRequest {
 
 message TagRequest {
   string tag = 1;
+}
+
+message SearchRequest {
+  string query = 1;
 }

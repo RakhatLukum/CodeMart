@@ -62,3 +62,23 @@ func (r *repo) GetByTag(tag string) ([]*entity.Product, error) {
 	}
 	return out, nil
 }
+func (r *repo) Search(query string) ([]*entity.Product, error) {
+	rows, err := r.db.Query(`SELECT id,name,price,tags FROM products WHERE name LIKE ?`, "%"+query+"%")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*entity.Product
+	for rows.Next() {
+		var p entity.Product
+		var tags string
+		if err := rows.Scan(&p.ID, &p.Name, &p.Price, &tags); err != nil {
+			return nil, err
+		}
+		if tags != "" {
+			p.Tags = strings.Split(tags, ",")
+		}
+		out = append(out, &p)
+	}
+	return out, nil
+}
