@@ -1,43 +1,78 @@
 package main
 
 import (
+	cartgrpc "CodeMart/cart-service/internal/cart/delivery/grpc"
+	"CodeMart/cart-service/internal/cart/repository/mysqlrepo"
+	"CodeMart/cart-service/internal/cart/usecase"
 	"database/sql"
+	"flag"
+	"fmt"
 	"log"
 	"net"
 	"os"
 
+	productpb "CodeMart/proto/product"
+
 	_ "github.com/go-sql-driver/mysql"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
 
-	delivery "CodeMart/cart-service/internal/cart/delivery/grpc"
-	repoPkg "CodeMart/cart-service/internal/cart/repository/mysqlrepo"
-	usePkg "CodeMart/cart-service/internal/cart/usecase"
+var (
+	port = flag.Int("port", 50053, "The server port")
 )
 
 func main() {
-	dsn := os.Getenv("DB_DSN")
-	if dsn == "" {
-		dsn = "root:MyStrongPassword123!@tcp(127.0.0.1:3306)/shop?parseTime=true"
+	flag.Parse()
+
+	// Get database connection string from environment or use default
+	dbDSN := os.Getenv("DB_DSN")
+	if dbDSN == "" {
+		dbDSN = "root:MyStrongPassword123!@tcp(127.0.0.1:3306)/shop?parseTime=true"
 	}
 
-	db, err := sql.Open("mysql", dsn)
+	// Connect to MySQL
+	db, err := sql.Open("mysql", dbDSN)
 	if err != nil {
-		log.Fatalf("db err: %v", err)
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	// Test the connection
+	if err := db.Ping(); err != nil {
+		log.Fatalf("failed to ping database: %v", err)
 	}
 
-	repo := repoPkg.New(db)
-	uc := usePkg.New(repo)
+	// Initialize repository
+	repo := mysqlrepo.New(db)
 
-	lis, err := net.Listen("tcp", ":50053")
+	// Initialize usecase
+	uc := usecase.New(repo)
+
+	// Connect to product service
+	productConn, err := grpc.Dial("localhost:50052", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("listen: %v", err)
+		log.Fatalf("failed to connect to product service: %v", err)
 	}
+	defer productConn.Close()
 
-	s := grpc.NewServer()
-	delivery.Register(s, uc)
+	productClient := productpb.NewProductServiceClient(productConn)
 
-	log.Printf("cart service on :50053")
+	// Create gRPC server with middleware
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(cartgrpc.UserContextMiddleware()),
+	)
+
+	// Register cart service with product client
+	cartgrpc.RegisterWithProductClient(s, uc, productClient)
+
+	// Start server
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("serve: %v", err)
+		log.Fatalf("failed to serve: %v", err)
 	}
 }

@@ -8,10 +8,7 @@ require (
 	github.com/go-sql-driver/mysql v1.9.2
 	google.golang.org/grpc v1.71.1
 	google.golang.org/protobuf v1.36.4
-	proto v0.0.0
 )
-
-replace proto => ./proto
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
