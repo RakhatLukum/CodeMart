@@ -2,11 +2,13 @@ package usecase
 
 import (
 	"CodeMart/analytics-service/internal/adapter/inmemory"
+	mailjet "CodeMart/analytics-service/internal/adapter/mailer"
 	"CodeMart/analytics-service/internal/adapter/redis"
 	"CodeMart/analytics-service/internal/model"
 	"CodeMart/analytics-service/internal/model/dto"
 	"CodeMart/analytics-service/internal/repository"
 	"context"
+	"fmt"
 	"time"
 )
 
@@ -14,17 +16,20 @@ type viewUsecase struct {
 	repo         repository.ViewRepository
 	redisClient  ViewCacheUsecase
 	memoryClient ViewMemoryUsecase
+	mailer       mailjet.MailjetClient
 }
 
 func NewViewUsecase(
 	repo repository.ViewRepository,
 	redisClient ViewCacheUsecase,
 	memoryClient ViewMemoryUsecase,
+	mailer mailjet.MailjetClient,
 ) ViewUsecase {
 	return &viewUsecase{
 		repo:         repo,
 		redisClient:  redisClient,
 		memoryClient: memoryClient,
+		mailer:       mailer,
 	}
 }
 
@@ -132,4 +137,27 @@ func (uc *viewMemoryUsecase) Get(productID int) (model.View, bool) {
 
 func (uc *viewMemoryUsecase) Delete(productID int) {
 	uc.memoryClient.Delete(productID)
+}
+
+func (uc *viewUsecase) GenerateDailyViewReportEmail(ctx context.Context, email string, name string) error {
+	stats, err := uc.GetDailyViews(ctx)
+	if err != nil {
+		return err
+	}
+
+	if len(stats) == 0 {
+		return fmt.Errorf("no views recorded yet")
+	}
+
+	report := "Daily View Stats:\n\n"
+	for _, s := range stats {
+		report += fmt.Sprintf("%s — %d views\n", s.Date, s.ViewCount)
+	}
+
+	err = uc.mailer.SendDailyReportEmail(email, name, report)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

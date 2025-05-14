@@ -18,6 +18,7 @@ type ViewUsecase interface {
 	GetProductViewCount(ctx context.Context, productID int) (int, error)
 	GetUserViewCount(ctx context.Context, userID int) (int, error)
 	GetDailyViews(ctx context.Context) ([]dto.DailyViewStat, error)
+	GenerateDailyViewReportEmail(ctx context.Context, email string, name string) error
 	GetHourlyViews(ctx context.Context) ([]dto.HourlyViewStat, error)
 	DeleteOldViews(ctx context.Context, olderThan time.Time) error
 }
