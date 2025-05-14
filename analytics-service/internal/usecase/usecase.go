@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"CodeMart/analytics-service/internal/adapter/inmemory"
+	"CodeMart/analytics-service/internal/adapter/redis"
 	"CodeMart/analytics-service/internal/model"
 	"CodeMart/analytics-service/internal/model/dto"
 	"CodeMart/analytics-service/internal/repository"
@@ -82,4 +84,52 @@ func (uc *viewUsecase) GetHourlyViews(ctx context.Context) ([]dto.HourlyViewStat
 
 func (uc *viewUsecase) DeleteOldViews(ctx context.Context, olderThan time.Time) error {
 	return uc.repo.DeleteOldViews(ctx, olderThan)
+}
+
+type viewCacheUsecase struct {
+	redisClient *redis.Client
+}
+
+func NewViewCacheUsecase(redisClient *redis.Client) ViewCacheUsecase {
+	return &viewCacheUsecase{redisClient: redisClient}
+}
+
+func (uc *viewCacheUsecase) Set(ctx context.Context, view model.View) error {
+	return uc.redisClient.Set(ctx, view)
+}
+
+func (uc *viewCacheUsecase) SetMany(ctx context.Context, views []model.View) error {
+	return uc.redisClient.SetMany(ctx, views)
+}
+
+func (uc *viewCacheUsecase) Get(ctx context.Context, productID int) (model.View, error) {
+	return uc.redisClient.Get(ctx, productID)
+}
+
+func (uc *viewCacheUsecase) Delete(ctx context.Context, productID int) error {
+	return uc.redisClient.Delete(ctx, productID)
+}
+
+type viewMemoryUsecase struct {
+	memoryClient *inmemory.Client
+}
+
+func NewViewMemoryUsecase(memoryClient *inmemory.Client) ViewMemoryUsecase {
+	return &viewMemoryUsecase{memoryClient: memoryClient}
+}
+
+func (uc *viewMemoryUsecase) Set(view model.View) {
+	uc.memoryClient.Set(view)
+}
+
+func (uc *viewMemoryUsecase) SetMany(views []model.View) {
+	uc.memoryClient.SetMany(views)
+}
+
+func (uc *viewMemoryUsecase) Get(productID int) (model.View, bool) {
+	return uc.memoryClient.Get(productID)
+}
+
+func (uc *viewMemoryUsecase) Delete(productID int) {
+	uc.memoryClient.Delete(productID)
 }

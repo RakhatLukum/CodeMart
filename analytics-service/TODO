@@ -43,6 +43,24 @@
 
 ---
 
+### 🔹 6. Redis Cache Endpoints
+
+* [ ] `CreateViewRequestRedis`
+* [ ] `BatchCreateViewsRequestRedis`
+* [ ] `GetViewRequestRedis`
+* [ ] `DeleteViewRequestRedis`
+
+---
+
+### 🔹 7. In-Memory Cache Endpoints
+
+* [ ] `CreateViewRequestCache`
+* [ ] `BatchCreateViewsRequestCache`
+* [ ] `GetViewRequestCache`
+* [ ] `DeleteViewRequestCache`
+
+---
+
 ### Shared
 
 * [ ] `ViewResponse`
