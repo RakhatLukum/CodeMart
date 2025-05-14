@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -37,7 +38,7 @@ type NATSConfig struct {
 }
 
 type GRPCConfig struct {
-	Port string
+	Port int
 }
 
 type MailjetConfig struct {
@@ -47,11 +48,24 @@ type MailjetConfig struct {
 	FromName  string
 }
 
-func LoadConfig() *Config {
-	_ = godotenv.Load()
+func LoadConfig() (*Config, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load .env file: %w", err)
+	}
 
-	dbIndex, _ := strconv.Atoi(getEnv("REDIS_DB", "0"))
-	ttlSec, _ := strconv.Atoi(getEnv("REDIS_TTL_SECONDS", "86400"))
+	dbIndex, err := strconv.Atoi(getEnv("REDIS_DB", "0"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid REDIS_DB: %w", err)
+	}
+	ttlSec, err := strconv.Atoi(getEnv("REDIS_TTL_SECONDS", "86400"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid REDIS_TTL_SECONDS: %w", err)
+	}
+	grpcPort, err := strconv.Atoi(getEnv("GRPC_PORT", "50054"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid GRPC_PORT: %w", err)
+	}
 
 	return &Config{
 		Redis: RedisConfig{
@@ -72,7 +86,7 @@ func LoadConfig() *Config {
 			URL: getEnv("NATS_URL", "nats://localhost:4222"),
 		},
 		GRPC: GRPCConfig{
-			Port: getEnv("GRPC_PORT", "50054"),
+			Port: grpcPort,
 		},
 		Mailjet: MailjetConfig{
 			APIKey:    getEnv("MAILJET_API_KEY", ""),
@@ -80,7 +94,7 @@ func LoadConfig() *Config {
 			FromEmail: getEnv("MAILJET_SENDER_EMAIL", "adajdzardanov@gmail.com"),
 			FromName:  getEnv("MAILJET_SENDER_NAME", "CodeMart"),
 		},
-	}
+	}, nil
 }
 
 func getEnv(key, defaultValue string) string {
