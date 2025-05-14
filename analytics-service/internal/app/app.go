@@ -77,7 +77,7 @@ func New(ctx stdContext.Context, cfg *configLoader.Config) (*App, error) {
 
 	redisCacheUsecase := viewUsecase.NewViewCacheUsecase(redisCacheAdapter.NewClient(redisClientInstance, cfg.Redis.TTL))
 	memoryCacheUsecase := viewUsecase.NewViewMemoryUsecase(inmemoryClient)
-	viewUsecaseInstance := viewUsecase.NewViewUsecase(viewRepo, redisCacheUsecase, memoryCacheUsecase, *mailjetAdapter)
+	viewUsecaseInstance := viewUsecase.NewViewUsecase(viewRepo, redisCacheUsecase, memoryCacheUsecase, mailjetAdapter)
 
 	natsSubscriber := natsSubscriberAdapter.NewSubscriber(
 		natsClientInstance.Conn,
