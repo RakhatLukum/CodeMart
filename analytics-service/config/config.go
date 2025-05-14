@@ -9,10 +9,11 @@ import (
 )
 
 type Config struct {
-	Redis RedisConfig
-	MySQL MySQLConfig
-	NATS  NATSConfig
-	GRPC  GRPCConfig
+	Redis   RedisConfig
+	MySQL   MySQLConfig
+	NATS    NATSConfig
+	GRPC    GRPCConfig
+	Mailjet MailjetConfig
 }
 
 type RedisConfig struct {
@@ -37,6 +38,13 @@ type NATSConfig struct {
 
 type GRPCConfig struct {
 	Port string
+}
+
+type MailjetConfig struct {
+	APIKey    string
+	SecretKey string
+	FromEmail string
+	FromName  string
 }
 
 func LoadConfig() *Config {
@@ -65,6 +73,12 @@ func LoadConfig() *Config {
 		},
 		GRPC: GRPCConfig{
 			Port: getEnv("GRPC_PORT", "50054"),
+		},
+		Mailjet: MailjetConfig{
+			APIKey:    getEnv("MAILJET_API_KEY", ""),
+			SecretKey: getEnv("MAILJET_SECRET_KEY", ""),
+			FromEmail: getEnv("MAILJET_SENDER_EMAIL", "adajdzardanov@gmail.com"),
+			FromName:  getEnv("MAILJET_SENDER_NAME", "CodeMart"),
 		},
 	}
 }
