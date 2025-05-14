@@ -16,14 +16,14 @@ type viewUsecase struct {
 	repo         repository.ViewRepository
 	redisClient  ViewCacheUsecase
 	memoryClient ViewMemoryUsecase
-	mailer       mailjet.MailjetClient
+	mailer       mailjet.Mailer
 }
 
 func NewViewUsecase(
 	repo repository.ViewRepository,
 	redisClient ViewCacheUsecase,
 	memoryClient ViewMemoryUsecase,
-	mailer mailjet.MailjetClient,
+	mailer mailjet.Mailer,
 ) ViewUsecase {
 	return &viewUsecase{
 		repo:         repo,
