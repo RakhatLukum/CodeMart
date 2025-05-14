@@ -28,8 +28,7 @@ func NewClient(cfg Config) (*Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := rdb.Ping(ctx).Result()
-	if err != nil {
+	if err := rdb.Ping(ctx).Err(); err != nil {
 		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
 	}
 
@@ -37,5 +36,19 @@ func NewClient(cfg Config) (*Client, error) {
 }
 
 func (c *Client) Close() error {
-	return c.Conn.Close()
+	if err := c.Conn.Close(); err != nil {
+		return fmt.Errorf("failed to close Redis connection: %w", err)
+	}
+	return nil
+}
+
+func (c *Client) Ping(ctx context.Context) error {
+	if err := c.Conn.Ping(ctx).Err(); err != nil {
+		return fmt.Errorf("redis ping failed: %w", err)
+	}
+	return nil
+}
+
+func (c *Client) Unwrap() *redis.Client {
+	return c.Conn
 }
