@@ -61,7 +61,7 @@
 
 ---
 
-### Shared
+### 🔹 Shared
 
 * [ ] `ViewResponse`
 
@@ -69,5 +69,11 @@
 
 ### 🔹 Project
 
-* [ ] `Mailjet`
-* [ ] `Unit & Integrational tests`
+* [+] `Clean architecture`
+* [+] `At least 12 gRPC Endpoints`
+* [+] `Usage of Message Queue (preferably NATS)`
+* [+] `Usage of Databases and Caches (including migrations and transactions)`
+* [+] `Sending Emails (using microsoft or google accounts for SMTP servers)`
+* [+] `Testing (Unit and Integrations tests)`
+* [-] `Bonus: Grafana`
+* [-] `Bonus: Front-End`
