@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	DSN      string
 	Username string
 	Password string
 	Host     string
@@ -20,8 +21,13 @@ type DB struct {
 }
 
 func NewDB(cfg Config) (*DB, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
-		cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.Database)
+	var dsn string
+	if cfg.DSN != "" {
+		dsn = cfg.DSN
+	} else {
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+			cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.Database)
+	}
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
