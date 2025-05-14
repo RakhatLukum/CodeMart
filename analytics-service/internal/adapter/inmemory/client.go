@@ -1,59 +1,48 @@
 package inmemory
 
 import (
-	"log"
-	"slices"
-	"sync"
-	"time"
-
 	"CodeMart/analytics-service/internal/model"
+	"sync"
 )
 
-type ViewCache struct {
-	views map[int][]model.View
+type Client struct {
+	views map[int]model.View
 	mu    sync.RWMutex
 }
 
-func NewViewCache() *ViewCache {
-	return &ViewCache{
-		views: make(map[int][]model.View),
+func NewClient() *Client {
+	return &Client{
+		views: make(map[int]model.View),
 	}
 }
 
-func (c *ViewCache) Add(view model.View) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.views[view.ProductID] = append(c.views[view.ProductID], view)
+func (vc *Client) Set(view model.View) {
+	vc.mu.Lock()
+	defer vc.mu.Unlock()
+
+	vc.views[view.ProductID] = view
 }
 
-func (c *ViewCache) GetByProduct(productID int) []model.View {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return append([]model.View(nil), c.views[productID]...)
-}
+func (vc *Client) SetMany(views []model.View) {
+	vc.mu.Lock()
+	defer vc.mu.Unlock()
 
-func (c *ViewCache) GetAll() map[int][]model.View {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	copyMap := make(map[int][]model.View, len(c.views))
-	for pid, vlist := range c.views {
-		copyMap[pid] = slices.Clone(vlist)
+	for _, view := range views {
+		vc.views[view.ProductID] = view
 	}
-	return copyMap
 }
 
-func (c *ViewCache) Clear() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.views = make(map[int][]model.View)
+func (vc *Client) Get(productID int) (model.View, bool) {
+	vc.mu.RLock()
+	defer vc.mu.RUnlock()
+
+	view, ok := vc.views[productID]
+	return view, ok
 }
 
-func StartViewCacheRefresher(cache *ViewCache) {
-	go func() {
-		for {
-			time.Sleep(12 * time.Hour)
-			cache.Clear()
-			log.Println("View cache cleared after 12 hours")
-		}
-	}()
+func (vc *Client) Delete(productID int) {
+	vc.mu.Lock()
+	defer vc.mu.Unlock()
+
+	delete(vc.views, productID)
 }
