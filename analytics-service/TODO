@@ -1,0 +1,48 @@
+### 🔹 1. Track Views
+
+* [ ] `CreateViewRequest`
+* [ ] `CreateViewResponse`
+
+---
+
+### 🔹 2. Basic Queries
+
+* [ ] `UserViewsResponse`
+* [ ] `ProductViewsResponse`
+* [ ] `UserProductViewsResponse`
+* [ ] `RecentViewsRequest`
+* [ ] `RecentViewsResponse`
+
+---
+
+### 🔹 3. Aggregated Statistics
+
+* [ ] `MostViewedProductsRequest`
+* [ ] `MostViewedProductsResponse`
+* [ ] `ProductViewCount`
+* [ ] `UserTopProductsResponse`
+* [ ] `ProductViewCountResponse`
+* [ ] `UserViewCountResponse`
+
+---
+
+### 🔹 4. Time-Based Analytics
+
+* [ ] `DailyViewsRequest`
+* [ ] `DailyViewsResponse`
+* [ ] `DailyViewStat`
+* [ ] `HourlyViewsResponse`
+* [ ] `HourlyViewStat`
+
+---
+
+### 🔹 5. Cleanup or Admin Tools
+
+* [ ] `DeleteOldViewsRequest`
+* [ ] `DeleteOldViewsResponse`
+
+---
+
+### Shared
+
+* [ ] `ViewResponse`
