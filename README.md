@@ -115,7 +115,7 @@ The service follows Clean Architecture principles, with the following layout:
 
    Ensure you have the Microshop repository cloned:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/RakhatLukum/CodeMart.git
    cd analytics-service
    ```
 
