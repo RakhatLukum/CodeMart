@@ -2,7 +2,6 @@
 
 # Configuration
 HOST="localhost:50054"
-PROTO_PATH="path/to/your/analytics-service.proto" # Update with actual path to proto file
 SERVICE="view.ViewService"
 
 # Check if grpcurl is installed
