@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"CodeMart/analytics-service/config"
-	"CodeMart/analytics-service/internal/adapter/grpc/handler"
-	"CodeMart/analytics-service/internal/model"
-	"CodeMart/analytics-service/internal/model/dto"
-	proto "CodeMart/analytics-service/proto"
+	"github.com/RakhatLukum/CodeMart/analytics-service/config"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/adapter/grpc/handler"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model/dto"
+	proto "github.com/RakhatLukum/CodeMart/analytics-service/proto"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

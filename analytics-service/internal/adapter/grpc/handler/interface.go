@@ -1,8 +1,9 @@
 package handler
 
 import (
-	proto "CodeMart/analytics-service/proto"
 	"context"
+
+	proto "github.com/RakhatLukum/CodeMart/analytics-service/proto"
 )
 
 type ViewServiceHandler interface {

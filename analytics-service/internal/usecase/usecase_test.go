@@ -1,12 +1,13 @@
 package usecase
 
 import (
-	"CodeMart/analytics-service/internal/model"
-	"CodeMart/analytics-service/internal/model/dto"
 	"context"
 	"errors"
 	"testing"
 	"time"
+
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model/dto"
 
 	"github.com/stretchr/testify/assert"
 )

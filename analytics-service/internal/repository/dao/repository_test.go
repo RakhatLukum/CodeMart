@@ -1,10 +1,11 @@
 package mysql
 
 import (
-	"CodeMart/analytics-service/internal/model"
 	"context"
 	"testing"
 	"time"
+
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"

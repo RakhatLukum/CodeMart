@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"CodeMart/analytics-service/internal/model"
-	"CodeMart/analytics-service/internal/usecase"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/usecase"
 
 	"github.com/nats-io/nats.go"
 )

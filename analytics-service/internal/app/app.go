@@ -8,19 +8,19 @@ import (
 	stdSignal "os/signal"
 	stdSyscall "syscall"
 
-	configLoader "CodeMart/analytics-service/config"
-	viewRepository "CodeMart/analytics-service/internal/repository"
-	viewUsecase "CodeMart/analytics-service/internal/usecase"
+	configLoader "github.com/RakhatLukum/CodeMart/analytics-service/config"
+	viewRepository "github.com/RakhatLukum/CodeMart/analytics-service/internal/repository"
+	viewUsecase "github.com/RakhatLukum/CodeMart/analytics-service/internal/usecase"
 
-	grpcServerAdapter "CodeMart/analytics-service/internal/adapter/grpc"
-	inmemoryCacheAdapter "CodeMart/analytics-service/internal/adapter/inmemory"
-	mailjetEmailAdapter "CodeMart/analytics-service/internal/adapter/mailer"
-	natsSubscriberAdapter "CodeMart/analytics-service/internal/adapter/nats"
-	redisCacheAdapter "CodeMart/analytics-service/internal/adapter/redis"
+	grpcServerAdapter "github.com/RakhatLukum/CodeMart/analytics-service/internal/adapter/grpc"
+	inmemoryCacheAdapter "github.com/RakhatLukum/CodeMart/analytics-service/internal/adapter/inmemory"
+	mailjetEmailAdapter "github.com/RakhatLukum/CodeMart/analytics-service/internal/adapter/mailer"
+	natsSubscriberAdapter "github.com/RakhatLukum/CodeMart/analytics-service/internal/adapter/nats"
+	redisCacheAdapter "github.com/RakhatLukum/CodeMart/analytics-service/internal/adapter/redis"
 
-	mysqlClient "CodeMart/analytics-service/pkg/mysql"
-	natsClient "CodeMart/analytics-service/pkg/nats"
-	redisClient "CodeMart/analytics-service/pkg/redis"
+	mysqlClient "github.com/RakhatLukum/CodeMart/analytics-service/pkg/mysql"
+	natsClient "github.com/RakhatLukum/CodeMart/analytics-service/pkg/nats"
+	redisClient "github.com/RakhatLukum/CodeMart/analytics-service/pkg/redis"
 
 	mailjetAPI "github.com/mailjet/mailjet-apiv3-go/v4"
 )

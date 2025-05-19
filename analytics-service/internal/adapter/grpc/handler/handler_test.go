@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"CodeMart/analytics-service/internal/model"
-	"CodeMart/analytics-service/internal/model/dto"
-	proto "CodeMart/analytics-service/proto"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model/dto"
+	proto "github.com/RakhatLukum/CodeMart/analytics-service/proto"
 
 	"github.com/stretchr/testify/assert"
 )

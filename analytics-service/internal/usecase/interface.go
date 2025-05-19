@@ -1,10 +1,11 @@
 package usecase
 
 import (
-	"CodeMart/analytics-service/internal/model"
-	"CodeMart/analytics-service/internal/model/dto"
 	"context"
 	"time"
+
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model/dto"
 )
 
 type ViewUsecase interface {

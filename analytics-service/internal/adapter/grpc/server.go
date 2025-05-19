@@ -5,10 +5,10 @@ import (
 	"log"
 	"net"
 
-	"CodeMart/analytics-service/config"
-	"CodeMart/analytics-service/internal/adapter/grpc/handler"
-	"CodeMart/analytics-service/internal/usecase"
-	proto "CodeMart/analytics-service/proto"
+	"github.com/RakhatLukum/CodeMart/analytics-service/config"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/adapter/grpc/handler"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/usecase"
+	proto "github.com/RakhatLukum/CodeMart/analytics-service/proto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

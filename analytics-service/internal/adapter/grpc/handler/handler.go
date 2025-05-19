@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"CodeMart/analytics-service/internal/model"
-	"CodeMart/analytics-service/internal/model/dto"
-	"CodeMart/analytics-service/internal/usecase"
-	proto "CodeMart/analytics-service/proto"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model/dto"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/usecase"
+	proto "github.com/RakhatLukum/CodeMart/analytics-service/proto"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

@@ -1,10 +1,11 @@
 package mysql
 
 import (
-	"CodeMart/analytics-service/internal/model"
 	"context"
 	"database/sql"
 	"fmt"
+
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
 )
 
 type View struct {

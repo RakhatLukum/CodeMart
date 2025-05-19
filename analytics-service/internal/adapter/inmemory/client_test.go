@@ -1,9 +1,10 @@
 package inmemory
 
 import (
-	"CodeMart/analytics-service/internal/model"
 	"testing"
 	"time"
+
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
 
 	"github.com/stretchr/testify/assert"
 )

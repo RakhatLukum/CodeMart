@@ -8,8 +8,8 @@ import (
 
 	goredis "github.com/redis/go-redis/v9"
 
-	"CodeMart/analytics-service/internal/model"
-	"CodeMart/analytics-service/pkg/redis"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
+	"github.com/RakhatLukum/CodeMart/analytics-service/pkg/redis"
 )
 
 const (

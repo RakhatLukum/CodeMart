@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"CodeMart/analytics-service/config"
-	"CodeMart/analytics-service/internal/app"
+	"github.com/RakhatLukum/CodeMart/analytics-service/config"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/app"
 )
 
 func main() {

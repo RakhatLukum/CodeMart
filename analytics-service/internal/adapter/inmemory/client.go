@@ -1,8 +1,9 @@
 package inmemory
 
 import (
-	"CodeMart/analytics-service/internal/model"
 	"sync"
+
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
 )
 
 type Client struct {

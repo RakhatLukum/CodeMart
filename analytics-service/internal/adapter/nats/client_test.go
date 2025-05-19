@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"CodeMart/analytics-service/internal/model"
-	"CodeMart/analytics-service/internal/model/dto"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model/dto"
 
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"

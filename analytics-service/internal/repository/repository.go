@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"time"
 
-	"CodeMart/analytics-service/internal/model"
-	"CodeMart/analytics-service/internal/model/dto"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model/dto"
 )
 
 type viewRepo struct {

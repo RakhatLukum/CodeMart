@@ -1,15 +1,16 @@
 package usecase
 
 import (
-	"CodeMart/analytics-service/internal/adapter/inmemory"
-	mailjet "CodeMart/analytics-service/internal/adapter/mailer"
-	"CodeMart/analytics-service/internal/adapter/redis"
-	"CodeMart/analytics-service/internal/model"
-	"CodeMart/analytics-service/internal/model/dto"
-	"CodeMart/analytics-service/internal/repository"
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/adapter/inmemory"
+	mailjet "github.com/RakhatLukum/CodeMart/analytics-service/internal/adapter/mailer"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/adapter/redis"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model/dto"
+	"github.com/RakhatLukum/CodeMart/analytics-service/internal/repository"
 )
 
 type viewUsecase struct {
