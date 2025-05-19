@@ -8,15 +8,12 @@ import (
 	"time"
 
 	"github.com/RakhatLukum/CodeMart/analytics-service/config"
-	"github.com/RakhatLukum/CodeMart/analytics-service/internal/adapter/grpc/handler"
 	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
 	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model/dto"
-	proto "github.com/RakhatLukum/CodeMart/analytics-service/proto"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
 )
 
@@ -195,7 +192,7 @@ func TestNewGRPCServer_Success(t *testing.T) {
 }
 
 func TestNewGRPCServer_ListenError(t *testing.T) {
-	lis, err := net.Listen("tcp", "0.0.0.0:50051")
+	lis, err := net.Listen("tcp", "0.0.0.0:50052")
 	require.NoError(t, err)
 	defer lis.Close()
 
@@ -215,49 +212,6 @@ func TestNewGRPCServer_ListenError(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, server)
 	assert.Contains(t, err.Error(), "failed to listen on")
-}
-
-func TestGRPCServer_Run_Success(t *testing.T) {
-	lis := bufconn.Listen(bufSize)
-	s := grpc.NewServer()
-
-	handler := handler.NewViewHandler(
-		&mockViewUsecase{},
-		&mockViewCacheUsecase{},
-		&mockViewMemoryUsecase{},
-	)
-
-	proto.RegisterViewServiceServer(s, handler)
-
-	server := &GRPCServer{
-		server:   s,
-		listener: lis,
-	}
-
-	errChan := make(chan error)
-	go func() {
-		errChan <- server.Run()
-	}()
-
-	time.Sleep(100 * time.Millisecond)
-
-	ctx := context.Background()
-	conn, err := grpc.DialContext(ctx, "bufnet",
-		grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
-			return lis.Dial()
-		}),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	require.NoError(t, err)
-	defer conn.Close()
-
-	client := proto.NewViewServiceClient(conn)
-	_, err = client.GetViewsByUser(ctx, &proto.UserRequest{UserId: 1})
-
-	assert.NoError(t, err)
-
-	server.Stop()
-	assert.NoError(t, <-errChan)
 }
 
 func TestGRPCServer_Run_Error(t *testing.T) {

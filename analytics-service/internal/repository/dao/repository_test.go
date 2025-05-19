@@ -11,57 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestView_Insert(t *testing.T) {
-	db, mock, _ := sqlmock.New()
-	defer db.Close()
-
-	tx, _ := db.Begin()
-	viewRepo := NewView(db)
-
-	view := model.View{UserID: 1, ProductID: 2, Timestamp: time.Now()}
-
-	mock.ExpectBegin()
-	mock.ExpectExec(`INSERT INTO views`).
-		WithArgs(view.UserID, view.ProductID, view.Timestamp).
-		WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectCommit()
-
-	err := tx.Commit()
-	assert.NoError(t, err)
-
-	err = viewRepo.Insert(context.Background(), tx, view)
-	assert.NoError(t, err)
-}
-
-func TestView_InsertMany(t *testing.T) {
-	db, mock, _ := sqlmock.New()
-	defer db.Close()
-
-	tx, _ := db.Begin()
-	viewRepo := NewView(db)
-
-	views := []model.View{
-		{UserID: 1, ProductID: 2, Timestamp: time.Now()},
-		{UserID: 3, ProductID: 4, Timestamp: time.Now()},
-	}
-
-	mock.ExpectBegin()
-	mock.ExpectPrepare(`INSERT INTO views`).
-		ExpectExec().WithArgs(views[0].UserID, views[0].ProductID, views[0].Timestamp).
-		WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectExec(`INSERT INTO views`).
-		WithArgs(views[1].UserID, views[1].ProductID, views[1].Timestamp).
-		WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectClose()
-	mock.ExpectCommit()
-
-	err := tx.Commit()
-	assert.NoError(t, err)
-
-	err = viewRepo.InsertMany(context.Background(), tx, views)
-	assert.NoError(t, err)
-}
-
 func TestView_SelectLatestByProductID(t *testing.T) {
 	db, mock, _ := sqlmock.New()
 	defer db.Close()

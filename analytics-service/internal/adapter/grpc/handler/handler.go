@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model"
 	"github.com/RakhatLukum/CodeMart/analytics-service/internal/model/dto"
@@ -31,6 +32,7 @@ func (h *ViewHandler) CreateView(ctx context.Context, req *proto.CreateViewReque
 	view := model.View{
 		UserID:    int(req.GetUserId()),
 		ProductID: int(req.GetProductId()),
+		Timestamp: time.Now(),
 	}
 
 	if err := h.viewUC.CreateView(ctx, view); err != nil {
@@ -89,7 +91,7 @@ func (h *ViewHandler) GetRecentViews(ctx context.Context, req *proto.RecentViews
 }
 
 func (h *ViewHandler) GetMostViewedProducts(ctx context.Context, req *proto.Empty) (*proto.MostViewedProductsResponse, error) {
-	products, err := h.viewUC.GetMostViewedProducts(ctx, 10) // Default limit
+	products, err := h.viewUC.GetMostViewedProducts(ctx, 10)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get most viewed products: %w", err)
 	}

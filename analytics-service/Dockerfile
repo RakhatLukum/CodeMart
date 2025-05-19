@@ -9,6 +9,6 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o analytics-service ./main.go
+RUN go build -o analytics-service ./cmd/main.go
 
 CMD ["./analytics-service"]

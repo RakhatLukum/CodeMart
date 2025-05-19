@@ -1,0 +1,10 @@
+To run all tests:
+```bash
+go test -v ./...
+```
+
+To trigger all endpoints:
+```bash
+./script/trigger.sh
+```
+
