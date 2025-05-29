@@ -2,7 +2,6 @@
 
 # Configuration
 HOST="localhost:50052"
-PROTO_PATH="proto/product.proto" # Update with actual path to proto file
 SERVICE="product.ProductService"
 
 # Check if grpcurl is installed
@@ -11,61 +10,46 @@ if ! command -v grpcurl &> /dev/null; then
     exit 1
 fi
 
-# Function to execute grpcurl command
-call_grpc() {
-    local method=$1
-    local data=$2
-    echo "Calling $method..."
-    if [ -z "$data" ]; then
-        grpcurl -proto "$PROTO_PATH" -plaintext -d "{}" $HOST $SERVICE/$method
-    else
-        grpcurl -proto "$PROTO_PATH" -plaintext -d "$data" $HOST $SERVICE/$method
-    fi
-    if [ $? -eq 0 ]; then
-        echo "Success: $method"
-    else
-        echo "Error: Failed to call $method"
-    fi
-    echo "----------------------------------------"
-}
+# Map of methods to JSON payloads
+declare -A PAYLOADS
 
-# 1. CreateProduct
-call_grpc "CreateProduct" '{"name": "Test Product", "price": 99.99, "tags": "test"}'
+PAYLOADS["CreateProduct"]='{"name": "Test Product", "price": 99.99, "tags": "test"}'
+PAYLOADS["GetProduct"]='{"id": 1}'
+PAYLOADS["UpdateProduct"]='{"id": 1, "name": "Updated Product", "price": 149.99, "tags": "updated"}'
+PAYLOADS["DeleteProduct"]='{"id": 1}'
+PAYLOADS["ListProducts"]=""
+PAYLOADS["SearchProducts"]='{"query": "test", "tags": "test"}'
+PAYLOADS["GetProductsByTag"]='{"tag": "test"}'
+PAYLOADS["SetProductCache"]='{"id": 1, "name": "Cached Product", "price": 99.99, "tags": "cache"}'
+PAYLOADS["InvalidateProductCache"]='{"id": 1}'
+PAYLOADS["SendProductEmail"]='{"product_id": 2, "email": "test@example.com"}'
+PAYLOADS["GetAllFromRedis"]=""
+PAYLOADS["GetAllFromCache"]=""
+PAYLOADS["BulkCreateProducts"]='{"products": [{"name": "Bulk Product 1", "price": 49.99, "tags": "bulk"}, {"name": "Bulk Product 2", "price": 59.99, "tags": "bulk"}]}'
 
-# 2. GetProduct
-call_grpc "GetProduct" '{"id": 1}'
+# Handle input
+if [ -z "$1" ]; then
+    echo "Usage: $0 <MethodName>"
+    echo "Available methods:"
+    for m in "${!PAYLOADS[@]}"; do echo "  - $m"; done
+    exit 1
+fi
 
-# 3. UpdateProduct
-call_grpc "UpdateProduct" '{"id": 1, "name": "Updated Product", "price": 149.99, "tags": "updated"}'
+METHOD="$1"
+DATA="${PAYLOADS[$METHOD]}"
 
-# 4. DeleteProduct
-call_grpc "DeleteProduct" '{"id": 1}'
+# Check for unknown method
+if [ -z "${PAYLOADS[$METHOD]+_}" ]; then
+    echo "Unknown method: $METHOD"
+    exit 1
+fi
 
-# 5. ListProducts
-call_grpc "ListProducts" ''
+echo "Calling $METHOD..."
 
-# 6. SearchProducts
-call_grpc "SearchProducts" '{"query": "test", "tags": "test"}'
+if [ -z "$DATA" ]; then
+    grpcurl -plaintext "$HOST" "$SERVICE/$METHOD"
+else
+    grpcurl -plaintext -d "$DATA" "$HOST" "$SERVICE/$METHOD"
+fi
 
-# 7. GetProductsByTag
-call_grpc "GetProductsByTag" '{"tag": "test"}'
-
-# 8. SetProductCache
-call_grpc "SetProductCache" '{"id": 1, "name": "Cached Product", "price": 99.99, "tags": "cache"}'
-
-# 9. InvalidateProductCache
-call_grpc "InvalidateProductCache" '{"id": 1}'
-
-# 10. SendProductEmail
-call_grpc "SendProductEmail" '{"product_id": 1, "email": "test@example.com"}'
-
-# 11. GetAllFromRedis
-call_grpc "GetAllFromRedis" ''
-
-# 12. GetAllFromCache
-call_grpc "GetAllFromCache" ''
-
-# 13. BulkCreateProducts
-call_grpc "BulkCreateProducts" '{"products": [{"name": "Bulk Product 1", "price": 49.99, "tags": "bulk"}, {"name": "Bulk Product 2", "price": 59.99, "tags": "bulk"}]}'
-
-echo "All endpoints triggered successfully!"
+echo "Done ✅"
