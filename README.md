@@ -100,18 +100,6 @@ Make sure the database schema is initialized from `/migrations`.
 go test -v ./...
 ```
 
-### Call gRPC Methods
-
-```bash
-./script/trigger.sh AddToCart
-```
-
-Use other methods like:
-
-```bash
-./script/trigger.sh GetCart
-```
-
 ## gRPC Endpoints
 
 The following endpoints are defined in `proto/cart.proto`:
