@@ -20,19 +20,3 @@ type ProductUsecase interface {
 	GetAllFromRedis(ctx context.Context) ([]model.Product, error)
 	GetAllFromCache(ctx context.Context) []model.Product
 }
-
-type ProductCacheUsecase interface {
-	Set(ctx context.Context, product model.Product) error
-	SetMany(ctx context.Context, products []model.Product) error
-	Get(ctx context.Context, id int) (model.Product, error)
-	Delete(ctx context.Context, id int) error
-	GetAll(ctx context.Context) ([]model.Product, error)
-}
-
-type ProductMemoryUsecase interface {
-	Set(product model.Product)
-	SetMany(products []model.Product)
-	Get(id int) (model.Product, bool)
-	Delete(id int)
-	GetAll() []model.Product
-}

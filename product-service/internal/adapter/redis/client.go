@@ -76,3 +76,38 @@ func (pc *Client) Delete(ctx context.Context, productID int) error {
 func (pc *Client) key(id int) string {
 	return fmt.Sprintf(keyPrefix, id)
 }
+
+func (pc *Client) GetAll(ctx context.Context) ([]model.Product, error) {
+	pattern := "product:*"
+	keys, err := pc.client.Unwrap().Keys(ctx, pattern).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch keys: %w", err)
+	}
+
+	if len(keys) == 0 {
+		return []model.Product{}, nil
+	}
+
+	values, err := pc.client.Unwrap().MGet(ctx, keys...).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch products: %w", err)
+	}
+
+	products := make([]model.Product, 0, len(values))
+	for _, val := range values {
+		if val == nil {
+			continue
+		}
+		data, ok := val.(string)
+		if !ok {
+			return nil, fmt.Errorf("unexpected value type in Redis")
+		}
+		var product model.Product
+		if err := json.Unmarshal([]byte(data), &product); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal product: %w", err)
+		}
+		products = append(products, product)
+	}
+
+	return products, nil
+}

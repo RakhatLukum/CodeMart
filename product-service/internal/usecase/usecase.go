@@ -3,22 +3,24 @@ package usecase
 import (
 	"context"
 
+	"github.com/RakhatLukum/CodeMart/product-service/internal/adapter/inmemory"
 	"github.com/RakhatLukum/CodeMart/product-service/internal/adapter/mailer"
+	cache "github.com/RakhatLukum/CodeMart/product-service/internal/adapter/redis"
 	"github.com/RakhatLukum/CodeMart/product-service/internal/model"
 	"github.com/RakhatLukum/CodeMart/product-service/internal/repository"
 )
 
 type productUsecase struct {
 	repo         repository.ProductRepository
-	redisClient  ProductCacheUsecase
-	memoryClient ProductMemoryUsecase
+	redisClient  cache.Client
+	memoryClient inmemory.Client
 	mailer       mailer.Mailer
 }
 
 func NewProductUsecase(
 	repo repository.ProductRepository,
-	redisClient ProductCacheUsecase,
-	memoryClient ProductMemoryUsecase,
+	redisClient cache.Client,
+	memoryClient inmemory.Client,
 	mailer mailer.Mailer,
 ) ProductUsecase {
 	return &productUsecase{
