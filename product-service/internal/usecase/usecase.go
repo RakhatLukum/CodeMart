@@ -5,6 +5,7 @@ import (
 
 	"github.com/RakhatLukum/CodeMart/product-service/internal/adapter/inmemory"
 	"github.com/RakhatLukum/CodeMart/product-service/internal/adapter/mailer"
+	"github.com/RakhatLukum/CodeMart/product-service/internal/adapter/nats"
 	cache "github.com/RakhatLukum/CodeMart/product-service/internal/adapter/redis"
 	"github.com/RakhatLukum/CodeMart/product-service/internal/model"
 	"github.com/RakhatLukum/CodeMart/product-service/internal/repository"
@@ -15,6 +16,7 @@ type productUsecase struct {
 	redisClient  cache.Client
 	memoryClient *inmemory.Client
 	mailer       mailer.Mailer
+	publisher    *nats.Publisher
 }
 
 func NewProductUsecase(
@@ -22,12 +24,14 @@ func NewProductUsecase(
 	redisClient cache.Client,
 	memoryClient *inmemory.Client,
 	mailer mailer.Mailer,
+	publisher *nats.Publisher,
 ) ProductUsecase {
 	return &productUsecase{
 		repo:         repo,
 		redisClient:  redisClient,
 		memoryClient: memoryClient,
 		mailer:       mailer,
+		publisher:    publisher,
 	}
 }
 
@@ -39,6 +43,7 @@ func (uc *productUsecase) CreateProduct(ctx context.Context, product model.Produ
 	product.ID = id
 	_ = uc.redisClient.Set(ctx, product)
 	uc.memoryClient.Set(product)
+	_ = uc.publisher.PublishProductCreated(product)
 	return id, nil
 }
 
@@ -53,6 +58,7 @@ func (uc *productUsecase) UpdateProduct(ctx context.Context, product model.Produ
 	}
 	_ = uc.redisClient.Set(ctx, product)
 	uc.memoryClient.Set(product)
+	_ = uc.publisher.PublishProductUpdated(product)
 	return nil
 }
 
@@ -63,6 +69,7 @@ func (uc *productUsecase) DeleteProduct(ctx context.Context, id int) error {
 	}
 	_ = uc.redisClient.Delete(ctx, id)
 	uc.memoryClient.Delete(id)
+	_ = uc.publisher.PublishProductDeleted(id)
 	return nil
 }
 

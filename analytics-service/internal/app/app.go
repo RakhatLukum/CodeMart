@@ -82,7 +82,7 @@ func New(ctx stdContext.Context, cfg *configLoader.Config) (*App, error) {
 	natsSubscriber := natsSubscriberAdapter.NewSubscriber(
 		natsClientInstance.Conn,
 		viewUsecaseInstance,
-		"products",
+		"product",
 		"users",
 		"carts",
 	)

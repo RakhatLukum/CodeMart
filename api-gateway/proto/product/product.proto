@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package product;
+
+option go_package = "github.com/RakhatLukum/CodeMart/product-service/proto";
+
+message Product {
+  int32 id = 1;
+  string name = 2;
+  double price = 3;
+  string tags = 4;
+}
+
+message ProductResponse {
+  int32 id = 1;
+  string name = 2;
+  double price = 3;
+  string tags = 4;
+}
+
+message CreateProductRequest {
+  string name = 1;
+  double price = 2;
+  string tags = 3;
+}
+
+message CreateProductResponse {
+  int32 id = 1;
+  string name = 2;
+  double price = 3;
+  string tags = 4;
+}
+
+message UpdateProductRequest {
+  int32 id = 1;
+  string name = 2;
+  double price = 3;
+  string tags = 4;
+}
+
+message DeleteProductResponse {
+  bool deleted = 1;
+}
+
+message ProductListResponse {
+  repeated ProductResponse products = 1;
+}
+
+message SearchProductsRequest {
+  string query = 1;
+  string tags = 2;
+}
+
+message TagRequest {
+  string tag = 1;
+}
+
+message ProductIDRequest {
+  int32 id = 1;
+}
+
+message CacheResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message SendProductEmailRequest {
+  int32 product_id = 1;
+  string email = 2;
+}
+
+message EmailStatusResponse {
+  bool sent = 1;
+  string message = 2;
+}
+
+message BulkCreateProductsRequest {
+  repeated CreateProductRequest products = 1;
+}
+
+message BulkCreateProductsResponse {
+  int32 created_count = 1;
+}
+
+service ProductService {
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+  rpc GetProduct(ProductIDRequest) returns (ProductResponse);
+  rpc UpdateProduct(UpdateProductRequest) returns (Empty);
+  rpc DeleteProduct(ProductIDRequest) returns (DeleteProductResponse);
+  rpc ListProducts(Empty) returns (ProductListResponse);
+  rpc SearchProducts(SearchProductsRequest) returns (ProductListResponse);
+  rpc GetProductsByTag(TagRequest) returns (ProductListResponse);
+  rpc SetProductCache(Product) returns (CacheResponse);
+  rpc InvalidateProductCache(ProductIDRequest) returns (CacheResponse);
+  rpc SendProductEmail(SendProductEmailRequest) returns (EmailStatusResponse);
+  rpc GetAllFromRedis(Empty) returns (ProductListResponse);
+  rpc GetAllFromCache(Empty) returns (ProductListResponse);
+  rpc BulkCreateProducts(BulkCreateProductsRequest) returns (BulkCreateProductsResponse);
+}
+
+message Empty {}

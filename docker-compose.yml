@@ -72,6 +72,25 @@ services:
       - nats
     restart: always
 
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "50050:50050" 
+    environment:
+      - HTTP_PORT=50050
+      - USER_SERVICE=user-service:50051
+      - PRODUCT_SERVICE=product-service:50052
+      - CART_SERVICE=cart-service:50053
+      - ANALYTICS_SERVICE=analytics-service:50054
+    depends_on:
+      - product-service
+      - analytics-service
+      - mysql
+    restart: always
+
   product-service:
     build:
       context: ./product-service

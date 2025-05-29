@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+package view;
+
+option go_package = "github.com/RakhatLukum/CodeMart/analytics-service";
+
+import "google/protobuf/timestamp.proto";
+
+service ViewService {
+  rpc CreateView(CreateViewRequest) returns (CreateViewResponse);
+  rpc GetViewsByUser(UserRequest) returns (UserViewsResponse);
+  rpc GetViewsByProduct(ProductRequest) returns (ProductViewsResponse);
+  rpc GetViewsByUserAndProduct(UserProductRequest) returns (UserProductViewsResponse);
+  rpc GetRecentViews(RecentViewsRequest) returns (RecentViewsResponse);
+  rpc GetMostViewedProducts(Empty) returns (MostViewedProductsResponse);
+  rpc GetUserTopProducts(UserTopProductsRequest) returns (UserTopProductsResponse);
+  rpc GetProductViewCount(ProductRequest) returns (ProductViewCountResponse);
+  rpc GetUserViewCount(UserRequest) returns (UserViewCountResponse);
+  rpc GetDailyViews(Empty) returns (DailyViewsResponse);
+  rpc GenerateDailyViewReportEmail(ReportEmailRequest) returns (ReportEmailResponse);
+  rpc GetHourlyViews(ProductRequest) returns (HourlyViewsResponse);
+  rpc DeleteOldViews(DeleteOldViewsRequest) returns (DeleteOldViewsResponse);
+
+  rpc GetCachedView(ProductRequest) returns (ViewResponse);
+  rpc GetMemoryCachedView(ProductRequest) returns (ViewResponse);
+}
+
+message Empty {}
+
+message CreateViewRequest {
+  int32 user_id = 1;
+  int32 product_id = 2;
+}
+
+message CreateViewResponse {
+  int32 id = 1;
+  int32 user_id = 2;
+  int32 product_id = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message UserRequest {
+  int32 user_id = 1;
+}
+
+message ProductRequest {
+  int32 product_id = 1;
+}
+
+message UserProductRequest {
+  int32 user_id = 1;
+  int32 product_id = 2;
+}
+
+message ViewResponse {
+  int32 id = 1;
+  int32 user_id = 2;
+  int32 product_id = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message UserViewsResponse {
+  repeated ViewResponse views = 1;
+}
+
+message ProductViewsResponse {
+  repeated ViewResponse views = 1;
+}
+
+message UserProductViewsResponse {
+  repeated ViewResponse views = 1;
+}
+
+message RecentViewsRequest {
+  int32 limit = 1;
+}
+
+message RecentViewsResponse {
+  repeated ViewResponse views = 1;
+}
+
+message ProductViewCount {
+  int32 product_id = 1;
+  int32 view_count = 2;
+}
+
+message MostViewedProductsResponse {
+  repeated ProductViewCount data = 1;
+}
+
+message UserTopProductsRequest {
+  int32 user_id = 1;
+  int32 limit = 2;
+}
+
+message UserTopProductsResponse {
+  int32 user_id = 1;
+  repeated ProductViewCount data = 2;
+}
+
+message ProductViewCountResponse {
+  int32 product_id = 1;
+  int32 view_count = 2;
+}
+
+message UserViewCountResponse {
+  int32 user_id = 1;
+  int32 view_count = 2;
+}
+
+message DailyViewStat {
+  string date = 1;
+  int32 view_count = 2;
+}
+
+message DailyViewsResponse {
+  repeated DailyViewStat data = 1;
+}
+
+message HourlyViewStat {
+  int32 hour = 1;
+  int32 view_count = 2;
+}
+
+message HourlyViewsResponse {
+  int32 product_id = 1;
+  repeated HourlyViewStat data = 2;
+}
+
+message ReportEmailRequest {
+  string email = 1;
+  string name = 2;
+}
+
+message ReportEmailResponse {
+  string message = 1;
+}
+
+message DeleteOldViewsRequest {
+  google.protobuf.Timestamp before = 1;
+}
+
+message DeleteOldViewsResponse {
+  int32 deleted_count = 1;
+}

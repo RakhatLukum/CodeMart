@@ -12,10 +12,12 @@ import (
 	service "github.com/RakhatLukum/CodeMart/product-service/internal/adapter/grpc"
 	"github.com/RakhatLukum/CodeMart/product-service/internal/adapter/inmemory"
 	"github.com/RakhatLukum/CodeMart/product-service/internal/adapter/mailer"
+	natsPublisher "github.com/RakhatLukum/CodeMart/product-service/internal/adapter/nats"
 	redisAdapter "github.com/RakhatLukum/CodeMart/product-service/internal/adapter/redis"
 	"github.com/RakhatLukum/CodeMart/product-service/internal/repository"
 	"github.com/RakhatLukum/CodeMart/product-service/internal/usecase"
 	"github.com/RakhatLukum/CodeMart/product-service/pkg/mysql"
+	natsClient "github.com/RakhatLukum/CodeMart/product-service/pkg/nats"
 	"github.com/RakhatLukum/CodeMart/product-service/pkg/redis"
 	mailjetAPI "github.com/mailjet/mailjet-apiv3-go/v4"
 )
@@ -55,6 +57,13 @@ func New(ctx context.Context, cfg *config.Config) (*App, error) {
 		return nil, fmt.Errorf("redis: %w", err)
 	}
 
+	log.Println("connecting to NATS", "url", cfg.NATS.URL)
+	natsClientInstance, err := natsClient.NewClient(cfg.NATS.URL)
+	if err != nil {
+		return nil, fmt.Errorf("nats: %w", err)
+	}
+	natsPublishers := natsPublisher.NewPublisher(natsClientInstance.Conn)
+
 	log.Println("initializing Mailjet client")
 	mailjetClientInstance := mailjetAPI.NewMailjetClient(cfg.Mailjet.APIKey, cfg.Mailjet.SecretKey)
 	mailjetAdapter := mailer.NewMailjetClient(mailjetClientInstance, cfg.Mailjet.FromEmail, cfg.Mailjet.FromName)
@@ -63,7 +72,7 @@ func New(ctx context.Context, cfg *config.Config) (*App, error) {
 	productRepo := repository.NewProductRepository(mysqlDB.Conn)
 	redisAdapterInstance := redisAdapter.NewClient(redisClientInstance, cfg.Redis.TTL)
 
-	productUsecase := usecase.NewProductUsecase(productRepo, *redisAdapterInstance, inmemoryClient, mailjetAdapter)
+	productUsecase := usecase.NewProductUsecase(productRepo, *redisAdapterInstance, inmemoryClient, mailjetAdapter, natsPublishers)
 
 	grpcServer, err := service.NewGRPCServer(*cfg, productUsecase)
 	if err != nil {
