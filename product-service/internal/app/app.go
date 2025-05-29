@@ -63,7 +63,7 @@ func New(ctx context.Context, cfg *config.Config) (*App, error) {
 	productRepo := repository.NewProductRepository(mysqlDB.Conn)
 	redisAdapterInstance := redisAdapter.NewClient(redisClientInstance, cfg.Redis.TTL)
 
-	productUsecase := usecase.NewProductUsecase(productRepo, *redisAdapterInstance, *inmemoryClient, mailjetAdapter)
+	productUsecase := usecase.NewProductUsecase(productRepo, *redisAdapterInstance, inmemoryClient, mailjetAdapter)
 
 	grpcServer, err := service.NewGRPCServer(*cfg, productUsecase)
 	if err != nil {

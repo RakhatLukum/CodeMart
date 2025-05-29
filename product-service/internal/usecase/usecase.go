@@ -13,14 +13,14 @@ import (
 type productUsecase struct {
 	repo         repository.ProductRepository
 	redisClient  cache.Client
-	memoryClient inmemory.Client
+	memoryClient *inmemory.Client
 	mailer       mailer.Mailer
 }
 
 func NewProductUsecase(
 	repo repository.ProductRepository,
 	redisClient cache.Client,
-	memoryClient inmemory.Client,
+	memoryClient *inmemory.Client,
 	mailer mailer.Mailer,
 ) ProductUsecase {
 	return &productUsecase{
