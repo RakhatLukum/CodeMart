@@ -1,55 +1,156 @@
-# Microshop – gRPC Clean Architecture Demo
+# Cart Service
 
-This repository contains four independent microservices communicating over **gRPC**,
-organised according to **Clean Architecture** principles.
+The `cart-service` is a core microservice in the **Microshop** project — a gRPC-based application following Clean Architecture. This service manages users’ shopping carts, offering flexible and efficient operations backed by Redis, MySQL, and in-memory caching.
 
-## Services
+## Responsibilities
 
-| Service | Port | Responsibilities |
-|---------|------|------------------|
-| user     | 50051 | Register, login, profile |
-| product  | 50052 | Product catalogue & filtering |
-| cart     | 50053 | Shopping cart per user |
-| analytics| 50054 | Product‑view statistics |
+The `cart-service` is responsible for:
 
-## Quick start
+* Adding, removing, and clearing cart items.
+* Updating items in a user’s cart.
+* Fetching cart contents and item count.
+* Calculating total cart value.
+* Sending cart summary emails.
+* Providing cart data from Redis and in-memory cache.
+* Supporting cache invalidation.
+
+## Service Details
+
+* **Port**: `50053`
+* **Transport**: `gRPC`
+* **Database**: `MySQL 8`
+
+## Directory Structure
+
+```
+├── cmd/
+│   └── main.go                    # Entry point
+├── config/
+│   ├── config.go
+│   └── config_test.go
+├── Dockerfile
+├── go.mod / go.sum
+├── internal/
+│   ├── adapter/
+│   │   ├── grpc/
+│   │   │   ├── handler/
+│   │   │   │   ├── handler.go
+│   │   │   │   └── handler_test.go
+│   │   │   └── server.go
+│   │   ├── inmemory/
+│   │   │   └── client.go
+│   │   ├── mailer/
+│   │   │   └── client.go
+│   │   ├── redis/
+│   │   │   └── client.go
+│   │   └── nats/
+│   │       └── client.go
+│   ├── app/
+│   │   └── app.go
+│   ├── model/
+│   │   ├── dto/
+│   │   │   └── cart.go
+│   │   └── cart.go
+│   ├── repository/
+│   │   ├── dao/
+│   │   │   └── repository.go
+│   │   └── interface.go
+│   └── usecase/
+│       ├── usecase.go
+│       └── interface.go
+├── migrations/
+│   ├── 001_create_products_table.sql
+│   ├── 002_create_users_table.sql
+│   ├── 003_create_carts_table.sql
+│   └── 004_add_cart_foreign_keys.sql
+├── pkg/
+│   ├── mysql/
+│   │   └── mysql.go
+│   └── redis/
+│       └── redis.go
+├── proto/
+│   ├── cart.proto
+│   └── cart.pb.go
+├── script/
+│   └── trigger.sh
+```
+
+## Setup and Quick Start
+
+### Requirements
+
+* **Go**: ≥ 1.22
+* **protoc** with `protoc-gen-go` and `protoc-gen-go-grpc`
+* **MySQL 8**
+* **grpcurl**
+
+### Start via Docker
 
 ```bash
-# 1. Generate protobuf stubs
-make proto
-
-# 2. Start a local MySQL (or use your own)
-docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=shop mysql:8
-mysql -h127.0.0.1 -uroot -ppassword shop < database/schema.sql
-mysql -h127.0.0.1 -uroot -ppassword shop < database/seed.sql
-
-# 3. Run each service in its own terminal
-go run user-service/cmd/server/main.go
-go run product-service/cmd/server/main.go
-go run cart-service/cmd/server/main.go
-go run analytics-service/cmd/server/main.go
+docker-compose up
 ```
 
-Environment variable `DB_DSN` overrides the default:
+Make sure the database schema is initialized from `/migrations`.
 
-```
-root:password@tcp(localhost:3306)/shop?parseTime=true
-```
+## Testing
 
-## Directory layout (per service)
+### Run Unit Tests
 
-```
-<service>/
-    cmd/server/main.go
-    internal/
-        entity/        # Enterprise objects
-        repository/    # Interface + MySQL impl
-        usecase/       # Application logic
-        delivery/grpc/ # Transport layer
+```bash
+go test -v ./...
 ```
 
-## Tooling requirements
+### Call gRPC Methods
 
-* Go ≥ 1.22
-* protoc + plugins (`protoc-gen-go`, `protoc-gen-go-grpc`)
-* MySQL 8
+```bash
+./script/trigger.sh AddToCart
+```
+
+Use other methods like:
+
+```bash
+./script/trigger.sh GetCart
+```
+
+## gRPC Endpoints
+
+The following endpoints are defined in `proto/cart.proto`:
+
+* `AddToCart`
+* `RemoveFromCart`
+* `ClearCart`
+* `GetCart`
+* `UpdateCartItem`
+* `HasProductInCart`
+* `GetCartItemCount`
+* `GetCartTotalPrice`
+* `SendCartSummaryEmail`
+* `InvalidateCartCache`
+* `GetAllFromRedis`
+* `GetAllFromCache`
+
+## Dependencies
+
+* **Database**: MySQL 8 (`products`, `users`, `carts`)
+* **Cache**: Redis + Go in-memory map
+* **Email**: Mailjet API
+* **NATS**: For pub/sub events (optional)
+* **gRPC**: External service communication
+
+## Notes
+
+* Cache fallback is supported between Redis and memory.
+* `SendCartSummaryEmail` sends a digest of current cart contents.
+* Ensure `product-service` is running for accurate pricing info.
+* The service supports horizontal scaling via stateless logic.
+
+## About Microshop
+
+This service is part of **Microshop**, a gRPC-based microservices e-commerce system. It works alongside:
+
+* **User Service** – Port `50051`
+* **Product Service** – Port `50052`
+* **Cart Service** – Port `50053`
+* **Analytics Service** – Port `50054`
+
+Let your services talk like pros — via gRPC! 
