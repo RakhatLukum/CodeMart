@@ -84,7 +84,7 @@ func New(ctx stdContext.Context, cfg *configLoader.Config) (*App, error) {
 		viewUsecaseInstance,
 		"product",
 		"users",
-		"carts",
+		"cart",
 	)
 	if err := natsSubscriber.Subscribe(); err != nil {
 		return nil, stdFmt.Errorf("nats subscribe: %w", err)

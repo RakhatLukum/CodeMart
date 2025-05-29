@@ -121,6 +121,36 @@ services:
       - nats
     restart: always
 
+  cart-service:
+    build:
+      context: ./cart-service
+      dockerfile: Dockerfile
+    container_name: cart-service
+    ports:
+      - "50053:50053"
+    environment:
+      - REDIS_ADDR=redis:6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+      - REDIS_TTL_SECONDS=86400
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=MyStrongPassword123!
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=shop
+      - MYSQL_DSN=root:MyStrongPassword123!@tcp(mysql:3306)/shop?parseTime=true
+      - NATS_URL=nats://nats:4222
+      - GRPC_PORT=50053
+      - MAILJET_API_KEY=8d4511b49e6428e511dbea891e04f378
+      - MAILJET_SECRET_KEY=bac44ceb80c253f8648fb6e666a5a378
+      - MAILJET_SENDER_EMAIL=adajdzardanov@gmail.com
+      - MAILJET_SENDER_NAME=CodeMart
+    depends_on:
+      - mysql
+      - redis
+      - nats
+    restart: always
+
 volumes:
   mysql_data:
   redis_data:

@@ -13,8 +13,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	analyticspb "github.com/RakhatLukum/CodeMart/api-gateway/proto/analytics"
+	cartpb "github.com/RakhatLukum/CodeMart/api-gateway/proto/cart"
 	productpb "github.com/RakhatLukum/CodeMart/api-gateway/proto/product"
 )
 
@@ -22,6 +24,7 @@ func main() {
 	r := gin.Default()
 	gin.SetMode(getEnv("GIN_MODE", "release"))
 
+	// Product Service Client
 	productConn, err := grpc.NewClient(getEnv("PRODUCT_SERVICE", "localhost:50052"), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Failed to connect to product service: %v", err)
@@ -29,6 +32,7 @@ func main() {
 	defer productConn.Close()
 	productClient := productpb.NewProductServiceClient(productConn)
 
+	// Analytics Service Client
 	analyticsConn, err := grpc.NewClient(getEnv("ANALYTICS_SERVICE", "localhost:50054"), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Failed to connect to analytics service: %v", err)
@@ -36,6 +40,15 @@ func main() {
 	defer analyticsConn.Close()
 	analyticsClient := analyticspb.NewViewServiceClient(analyticsConn)
 
+	// Cart Service Client
+	cartConn, err := grpc.NewClient(getEnv("CART_SERVICE", "cart-service:50053"), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("Failed to connect to cart service: %v", err)
+	}
+	defer cartConn.Close()
+	cartClient := cartpb.NewCartServiceClient(cartConn)
+
+	// Product Service Endpoints
 	r.POST("/api/v1/products", func(c *gin.Context) {
 		var req productpb.CreateProductRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -144,9 +157,137 @@ func main() {
 		var req productpb.BulkCreateProductsRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
 		}
 		res, err := productClient.BulkCreateProducts(context.Background(), &req)
+		handleResponse(c, res, err)
+	})
+
+	// Cart Service Endpoints
+	r.POST("/api/v1/cart", func(c *gin.Context) {
+		var req cartpb.CreateCartRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		res, err := cartClient.AddToCart(context.Background(), &req)
+		handleResponse(c, res, err)
+	})
+
+	r.POST("/api/v1/cart/remove", func(c *gin.Context) {
+		var req cartpb.DeleteCartItemRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		res, err := cartClient.RemoveFromCart(context.Background(), &req)
+		handleResponse(c, res, err)
+	})
+
+	r.POST("/api/v1/cart/clear", func(c *gin.Context) {
+		var req cartpb.UserIDRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		res, err := cartClient.ClearCart(context.Background(), &req)
+		handleResponse(c, res, err)
+	})
+
+	r.GET("/api/v1/cart", func(c *gin.Context) {
+		userID, err := strconv.Atoi(c.Query("user_id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id"})
+			return
+		}
+		res, err := cartClient.GetCart(context.Background(), &cartpb.UserIDRequest{UserId: int32(userID)})
+		handleResponse(c, res, err)
+	})
+
+	r.GET("/api/v1/cart/items", func(c *gin.Context) {
+		userID, err := strconv.Atoi(c.Query("user_id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id"})
+			return
+		}
+		res, err := cartClient.GetCartItems(context.Background(), &cartpb.UserIDRequest{UserId: int32(userID)})
+		handleResponse(c, res, err)
+	})
+
+	r.POST("/api/v1/cart/update", func(c *gin.Context) {
+		var req cartpb.UpdateCartItemRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		res, err := cartClient.UpdateCartItem(context.Background(), &req)
+		handleResponse(c, res, err)
+	})
+
+	r.GET("/api/v1/cart/has", func(c *gin.Context) {
+		userID, err := strconv.Atoi(c.Query("user_id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id"})
+			return
+		}
+		productID, err := strconv.Atoi(c.Query("product_id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid product_id"})
+			return
+		}
+		res, err := cartClient.HasProductInCart(context.Background(), &cartpb.HasProductInCartRequest{
+			UserId:    int32(userID),
+			ProductId: int32(productID),
+		})
+		handleResponse(c, res, err)
+	})
+
+	r.GET("/api/v1/cart/count", func(c *gin.Context) {
+		userID, err := strconv.Atoi(c.Query("user_id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id"})
+			return
+		}
+		res, err := cartClient.GetCartItemCount(context.Background(), &cartpb.UserIDRequest{UserId: int32(userID)})
+		handleResponse(c, res, err)
+	})
+
+	r.GET("/api/v1/cart/total", func(c *gin.Context) {
+		userID, err := strconv.Atoi(c.Query("user_id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id"})
+			return
+		}
+		res, err := cartClient.GetCartTotalPrice(context.Background(), &cartpb.UserIDRequest{UserId: int32(userID)})
+		handleResponse(c, res, err)
+	})
+
+	r.POST("/api/v1/cart/email", func(c *gin.Context) {
+		var req cartpb.SendCartSummaryEmailRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		res, err := cartClient.SendCartSummaryEmail(context.Background(), &req)
+		handleResponse(c, res, err)
+	})
+
+	r.POST("/api/v1/cart/cache/invalidate", func(c *gin.Context) {
+		var req cartpb.UserIDRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		res, err := cartClient.InvalidateCartCache(context.Background(), &req)
+		handleResponse(c, res, err)
+	})
+
+	r.GET("/api/v1/cart/cache/redis", func(c *gin.Context) {
+		res, err := cartClient.GetAllFromRedis(context.Background(), &emptypb.Empty{})
+		handleResponse(c, res, err)
+	})
+
+	r.GET("/api/v1/cart/cache/memory", func(c *gin.Context) {
+		res, err := cartClient.GetAllFromCache(context.Background(), &emptypb.Empty{})
 		handleResponse(c, res, err)
 	})
 

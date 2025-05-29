@@ -43,6 +43,7 @@ func (uc *cartUsecase) AddToCart(ctx context.Context, cart model.Cart) (int, err
 	}
 	uc.memoryClient.Set(cart)
 	uc.redisClient.Set(ctx, cart)
+	uc.publisher.PublishCartCreated(cart)
 	return id, nil
 }
 
