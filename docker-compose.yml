@@ -78,7 +78,7 @@ services:
       dockerfile: Dockerfile
     container_name: product-service
     ports:
-      - "50051:50051"
+      - "50052:50052"
     environment:
       - REDIS_ADDR=redis:6379
       - REDIS_PASSWORD=
@@ -91,7 +91,7 @@ services:
       - MYSQL_DATABASE=shop
       - MYSQL_DSN=root:MyStrongPassword123!@tcp(mysql:3306)/shop?parseTime=true
       - NATS_URL=nats://nats:4222
-      - GRPC_PORT=50051
+      - GRPC_PORT=50052
       - MAILJET_API_KEY=8d4511b49e6428e511dbea891e04f378
       - MAILJET_SECRET_KEY=bac44ceb80c253f8648fb6e666a5a378
       - MAILJET_SENDER_EMAIL=adajdzardanov@gmail.com
