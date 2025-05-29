@@ -21,18 +21,31 @@ func NewMailjetClient(client *mailjet.Client, from string, name string) *Mailjet
 	}
 }
 
-func (m *MailjetClient) SendCartItemAddedEmail(toEmail, toName string, cart model.Cart) error {
-	subject := "Item Added to Your Cart"
-	text := fmt.Sprintf("An item has been added to your cart:\n\nCart ID: %d\nUser ID: %d\nProduct ID: %d",
-		cart.ID, cart.UserID, cart.ProductID)
+type Mailer interface {
+	SendCartSummaryEmail(toEmail, toName string, carts []model.Cart, products []model.Product) error
+}
 
-	html := fmt.Sprintf(`
-		<h3>Item Added to Cart</h3>
-		<ul>
-			<li><strong>Cart ID:</strong> %d</li>
-			<li><strong>User ID:</strong> %d</li>
-			<li><strong>Product ID:</strong> %d</li>
-		</ul>`, cart.ID, cart.UserID, cart.ProductID)
+func (m *MailjetClient) SendCartSummaryEmail(toEmail, toName string, carts []model.Cart, products []model.Product) error {
+	subject := "Your Cart Summary"
+	text := "Here is the summary of your cart:\n\n"
+	html := `<h3>Your Cart Summary</h3><ul>`
+
+	for i, cart := range carts {
+		product := products[i]
+		text += fmt.Sprintf("- CartID: %d, Product: %s, Price: %.2f, ProductID: %d\n",
+			cart.ID, product.Name, product.Price, product.ID)
+
+		html += fmt.Sprintf(`
+			<li>
+				<strong>Product:</strong> %s<br/>
+				<strong>Price:</strong> %.2f<br/>
+				<strong>Product ID:</strong> %d<br/>
+				<strong>Cart ID:</strong> %d
+			</li><br/>
+		`, product.Name, product.Price, product.ID, cart.ID)
+	}
+
+	html += `</ul>`
 
 	return m.SendEmail(toEmail, toName, subject, text, html)
 }
