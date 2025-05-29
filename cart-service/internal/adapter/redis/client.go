@@ -12,6 +12,10 @@ import (
 	"github.com/RakhatLukum/CodeMart/cart-service/pkg/redis"
 )
 
+const (
+	keyPrefix = "cart:%d"
+)
+
 type Client struct {
 	client *redis.Client
 	ttl    time.Duration
@@ -30,7 +34,7 @@ func (cc *Client) Set(ctx context.Context, cart model.Cart) error {
 		return fmt.Errorf("failed to marshal cart: %w", err)
 	}
 
-	return cc.client.Unwrap().Set(ctx, cc.key(cart.UserID, cart.ProductID), data, cc.ttl).Err()
+	return cc.client.Unwrap().Set(ctx, cc.key(cart.ID), data, cc.ttl).Err()
 }
 
 func (cc *Client) SetMany(ctx context.Context, carts []model.Cart) error {
@@ -40,7 +44,7 @@ func (cc *Client) SetMany(ctx context.Context, carts []model.Cart) error {
 		if err != nil {
 			return fmt.Errorf("failed to marshal cart: %w", err)
 		}
-		pipe.Set(ctx, cc.key(cart.UserID, cart.ProductID), data, cc.ttl)
+		pipe.Set(ctx, cc.key(cart.ID), data, cc.ttl)
 	}
 	_, err := pipe.Exec(ctx)
 	if err != nil {
@@ -49,13 +53,13 @@ func (cc *Client) SetMany(ctx context.Context, carts []model.Cart) error {
 	return nil
 }
 
-func (cc *Client) Get(ctx context.Context, userID, productID int) (model.Cart, error) {
-	data, err := cc.client.Unwrap().Get(ctx, cc.key(userID, productID)).Bytes()
+func (cc *Client) Get(ctx context.Context, cartID int) (model.Cart, error) {
+	data, err := cc.client.Unwrap().Get(ctx, cc.key(cartID)).Bytes()
 	if err != nil {
 		if err == goredis.Nil {
 			return model.Cart{}, nil
 		}
-		return model.Cart{}, fmt.Errorf("failed to get cart item: %w", err)
+		return model.Cart{}, fmt.Errorf("failed to get cart: %w", err)
 	}
 
 	var cart model.Cart
@@ -65,31 +69,45 @@ func (cc *Client) Get(ctx context.Context, userID, productID int) (model.Cart, e
 	return cart, nil
 }
 
-func (cc *Client) GetAll(ctx context.Context, userID int) ([]model.Cart, error) {
-	pattern := fmt.Sprintf("cart:%d:*", userID)
+func (cc *Client) Delete(ctx context.Context, cartID int) error {
+	return cc.client.Unwrap().Del(ctx, cc.key(cartID)).Err()
+}
+
+func (cc *Client) key(id int) string {
+	return fmt.Sprintf(keyPrefix, id)
+}
+
+func (cc *Client) GetAll(ctx context.Context) ([]model.Cart, error) {
+	pattern := "cart:*"
 	keys, err := cc.client.Unwrap().Keys(ctx, pattern).Result()
 	if err != nil {
-		return nil, fmt.Errorf("failed to list keys: %w", err)
+		return nil, fmt.Errorf("failed to fetch keys: %w", err)
 	}
 
-	var carts []model.Cart
-	for _, key := range keys {
-		data, err := cc.client.Unwrap().Get(ctx, key).Bytes()
-		if err != nil {
+	if len(keys) == 0 {
+		return []model.Cart{}, nil
+	}
+
+	values, err := cc.client.Unwrap().MGet(ctx, keys...).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch cart values: %w", err)
+	}
+
+	carts := make([]model.Cart, 0, len(values))
+	for _, val := range values {
+		if val == nil {
 			continue
 		}
-		var cart model.Cart
-		if err := json.Unmarshal(data, &cart); err == nil {
-			carts = append(carts, cart)
+		data, ok := val.(string)
+		if !ok {
+			return nil, fmt.Errorf("unexpected value type in Redis")
 		}
+		var cart model.Cart
+		if err := json.Unmarshal([]byte(data), &cart); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal cart: %w", err)
+		}
+		carts = append(carts, cart)
 	}
+
 	return carts, nil
-}
-
-func (cc *Client) Delete(ctx context.Context, userID, productID int) error {
-	return cc.client.Unwrap().Del(ctx, cc.key(userID, productID)).Err()
-}
-
-func (cc *Client) key(userID, productID int) string {
-	return fmt.Sprintf("%s%d:%d", "cart:", userID, productID)
 }
