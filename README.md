@@ -1,55 +1,160 @@
-# Microshop – gRPC Clean Architecture Demo
+# Product Service
 
-This repository contains four independent microservices communicating over **gRPC**,
-organised according to **Clean Architecture** principles.
+The `product-service` is a core microservice in the **Microshop** project — a gRPC-based demo application designed with Clean Architecture principles. This service manages product-related operations in the online store, including CRUD operations, search, and caching.
 
-## Services
+## Responsibilities
 
-| Service | Port | Responsibilities |
-|---------|------|------------------|
-| user     | 50051 | Register, login, profile |
-| product  | 50052 | Product catalogue & filtering |
-| cart     | 50053 | Shopping cart per user |
-| analytics| 50054 | Product‑view statistics |
+The `product-service` handles the following functionalities:
 
-## Quick start
+* Creating, retrieving, updating, and deleting products.
+* Listing all available products.
+* Searching products by name or tags.
+* Filtering products by a specific tag.
+* Caching products in Redis and in-memory cache.
+* Invalidating product cache entries.
+* Sending product notification emails (e.g., on creation).
+* Bulk creation of multiple products.
+
+## Service Details
+
+* **Port**: 50052
+* **Transport**: gRPC
+* **Database**: MySQL 8 (shared across Microshop services)
+
+## Directory Structure
+
+The service adheres to Clean Architecture and uses the following layout:
+
+```
+├── cmd/
+│   └── main.go                    # Entry point
+├── config/
+│   ├── config.go
+│   └── config_test.go
+├── Dockerfile                     # Container definition
+├── go.mod / go.sum                # Dependencies
+├── internal/
+│   ├── adapter/
+│   │   ├── grpc/
+│   │   │   ├── handler/
+│   │   │   │   ├── handler.go
+│   │   │   │   └── handler_test.go
+│   │   │   └── server.go
+│   │   ├── inmemory/
+│   │   │   └── client.go
+│   │   ├── mailer/
+│   │   │   └── client.go
+│   │   ├── redis/
+│   │   │   └── client.go
+│   │   └── nats/                  # NATS client (optional future use)
+│   │       └── client.go
+│   ├── app/
+│   │   └── app.go                 # Dependency injection
+│   ├── model/
+│   │   ├── dto/
+│   │   │   └── product.go
+│   │   └── product.go
+│   ├── repository/
+│   │   ├── dao/
+│   │   │   └── repository.go
+│   │   └── interface.go
+│   └── usecase/
+│       ├── usecase.go
+│       └── interface.go
+├── migrations/
+│   ├── 001_create_products_table.sql
+│   └── 002_create_users_and_carts.sql
+├── pkg/
+│   ├── mysql/
+│   │   └── mysql.go
+│   └── redis/
+│       └── redis.go
+├── proto/
+│   ├── product.proto              # gRPC definitions
+│   └── product.pb.go             # Generated code
+├── script/
+│   └── trigger.sh                # gRPC testing script
+```
+
+## Setup and Quick Start
+
+### Prerequisites
+
+* **Go**: ≥ 1.22
+* **protoc**: With `protoc-gen-go` and `protoc-gen-go-grpc`
+* **MySQL 8** with schema from `/migrations`
+* **grpcurl**: Install via `go install github.com/fullstorydev/grpcurl/...@latest`
+
+### Start with Docker
 
 ```bash
-# 1. Generate protobuf stubs
-make proto
-
-# 2. Start a local MySQL (or use your own)
-docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=shop mysql:8
-mysql -h127.0.0.1 -uroot -ppassword shop < database/schema.sql
-mysql -h127.0.0.1 -uroot -ppassword shop < database/seed.sql
-
-# 3. Run each service in its own terminal
-go run user-service/cmd/server/main.go
-go run product-service/cmd/server/main.go
-go run cart-service/cmd/server/main.go
-go run analytics-service/cmd/server/main.go
+docker-compose up
 ```
 
-Environment variable `DB_DSN` overrides the default:
+Ensure that the `product-service` image is properly built and the MySQL database is initialized with schema.
 
-```
-root:password@tcp(localhost:3306)/shop?parseTime=true
-```
+## Testing
 
-## Directory layout (per service)
+### Run All Unit Tests
 
-```
-<service>/
-    cmd/server/main.go
-    internal/
-        entity/        # Enterprise objects
-        repository/    # Interface + MySQL impl
-        usecase/       # Application logic
-        delivery/grpc/ # Transport layer
+```bash
+go test -v ./...
 ```
 
-## Tooling requirements
+### Test gRPC Endpoints
 
-* Go ≥ 1.22
-* protoc + plugins (`protoc-gen-go`, `protoc-gen-go-grpc`)
-* MySQL 8
+Trigger all endpoints using the helper script:
+
+```bash
+./script/trigger.sh CreateProduct
+```
+
+You can call other methods by name, e.g.:
+
+```bash
+./script/trigger.sh ListProducts
+```
+
+Ensure the service is running and `grpcurl` is installed.
+
+## gRPC Endpoints
+
+The following gRPC endpoints are exposed in `proto/product.proto`:
+
+* `CreateProduct`
+* `GetProduct`
+* `UpdateProduct`
+* `DeleteProduct`
+* `ListProducts`
+* `SearchProducts`
+* `GetProductsByTag`
+* `SetProductCache`
+* `InvalidateProductCache`
+* `SendProductEmail`
+* `GetAllFromRedis`
+* `GetAllFromCache`
+* `BulkCreateProducts`
+
+## Dependencies
+
+* **Database**: MySQL 8 (tables: products, users, carts)
+* **Mailer**: Mailjet API
+* **Cache**: Redis + in-memory Go map
+* **gRPC**: For external communication
+
+## Notes
+
+* Ensure that foreign key constraints (`ON DELETE CASCADE`) are set to avoid deletion errors.
+* The trigger script assumes gRPC reflection is enabled. If not, update the script to use `.proto` definitions directly.
+* The service is built to scale horizontally and integrates smoothly with analytics and user services in the Microshop project.
+
+## About Microshop
+
+The `product-service` is part of **Microshop**, a microservices-based demo project for an online store. The ecosystem includes:
+
+* **User Service** (port 50051)
+* **Product Service** (port 50052)
+* **Cart Service** (port 50053)
+* **Analytics Service** (port 50054)
+
+Explore the entire project to see how gRPC, Clean Architecture, and microservices work in harmony! 🌟
