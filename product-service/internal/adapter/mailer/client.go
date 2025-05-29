@@ -13,10 +13,6 @@ type MailjetClient struct {
 	Name   string
 }
 
-type Mailer interface {
-	SendProductCreatedEmail(toEmail, toName string, product model.Product) error
-}
-
 func NewMailjetClient(client *mailjet.Client, from string, name string) *MailjetClient {
 	return &MailjetClient{
 		client: client,
